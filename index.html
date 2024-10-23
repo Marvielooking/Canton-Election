@@ -111,45 +111,84 @@
     <div class="results" id="results"></div>
     
     <script>
-        function submitVote() {
-            let votes = JSON.parse(localStorage.getItem('votes')) || {
-                Challengers: { IBRAHIM: 0, JASEEM_AHMED: 0 },
-                Braves: { ANAYA_UMAIR: 0, WAJAHAT_SANI: 0 },
-                Fighters: { WAJIHA_ZEHRA: 0, MUHAMMAD_UMAR_KHAN: 0 },
-                Stalwarts: { HOORAIN_INAYATULLAH: 0, MUHAMMAD_MUREED: 0 }
-            };
-        
-            ['Challengers', 'Braves', 'Fighters', 'Stalwarts'].forEach(category => {
-                let selected = document.querySelector(`input[name="${category}"]:checked`);
-                if (selected) {
-                    let participant = selected.value.replace(" ", "_");
-                    votes[category][participant]++;
+    function submitVote() {
+        var votesRef = database.ref('votes');
+        votesRef.push({
+            Challengers: document.querySelector('input[name="Challengers"]:checked').value,
+            Braves: document.querySelector('input[name="Braves"]:checked').value,
+            Fighters: document.querySelector('input[name="Fighters"]:checked').value,
+            Stalwarts: document.querySelector('input[name="Stalwarts"]:checked').value
+        });
+        alert("Your vote has been submitted!");
+        location.reload();  // Reload the page
+    }
+      
+       <script>
+    function calculateResults() {
+        var votesRef = database.ref('votes');
+        votesRef.once('value', function(snapshot) {
+            var votes = snapshot.val();
+            // Process and display the votes
+            var results = {};
+            for (var key in votes) {
+                if (votes.hasOwnProperty(key)) {
+                    var vote = votes[key];
+                    for (var category in vote) {
+                        if (vote.hasOwnProperty(category)) {
+                            if (!results[category]) {
+                                results[category] = {};
+                            }
+                            if (!results[category][vote[category]]) {
+                                results[category][vote[category]] = 0;
+                            }
+                            results[category][vote[category]]++;
+                        }
+                    }
                 }
-            });
-        
-            localStorage.setItem('votes', JSON.stringify(votes));
-            alert("Your vote has been submitted!");
-            location.reload();  // Reload the page
-        }
-        
-        function calculateResults() {
-            let votes = JSON.parse(localStorage.getItem('votes')) || {};
-        
-            document.getElementById('results').innerHTML = `
-                <h3>Results</h3>
-                ${Object.keys(votes).map(category => `
-                    <div class="result-item">
-                        <strong>${category}:</strong>
-                        ${Object.keys(votes[category]).map(participant => `
-                            <p>${participant.replace("_", " ")}: ${votes[category][participant]}</p>
-                        `).join('')}
-                    </div>
-                `).join('')}
-            `;
-            document.getElementById('results').style.display = 'block';
-        }
-   
+            }
+            displayResults(results);
+        });
+    }
+
+    function displayResults(results) {
+        document.getElementById('results').innerHTML = `
+            <h3>Results</h3>
+            ${Object.keys(results).map(category => `
+                <div class="result-item">
+                    <strong>${category}:</strong>
+                    ${Object.keys(results[category]).map(participant => `
+                        <p>${participant.replace("_", " ")}: ${results[category][participant]}</p>
+                    `).join('')}
+                </div>
+            `).join('')}
+        `;
+        document.getElementById('results').style.display = 'block';
+    }
 </script>
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDLGQdj51bAq5iaH-9PZDJlvOLlsIVFlcQ",
+  authDomain: "iiuisl-canton-election.firebaseapp.com",
+  projectId: "iiuisl-canton-election",
+  storageBucket: "iiuisl-canton-election.appspot.com",
+  messagingSenderId: "161454008744",
+  appId: "1:161454008744:web:27c49cfe7c27adcfb9d59d",
+  measurementId: "G-MKZE92HLSJ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+    
 </body>
 </html>
