@@ -1,42 +1,33 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>IIUI Schools Canton Election</title>
-
     <style>
         body { font-family: Arial, sans-serif; }
         .header { display: flex; align-items: center; justify-content: space-between; }
         .header img { width: 200px; height: 200px; }
-        
         .category { margin: 150px 0; text-align: center; }
-        .category h2 { font-size: 2.5em; } /* Added for increasing category heading font size */
-         h1 { font-size: 3em; } /* Added for increasing main heading font size */
-
+        .category h2 { font-size: 2.5em; }
+        h1 { font-size: 3em; }
         .results { margin-top: 20px; display: none; }
         .result-item { margin: 50px 0; }
-
         .participants { display: flex; justify-content: center; }
         .participant { display: flex; align-items: center; margin: 0 100px; }
-        .participant label { font-size: 2.0em; margin-left: 10px; } /* Increased participant name font size */
-        
-         img { max-width: 100%; height: auto; }
+        .participant label { font-size: 2.0em; margin-left: 10px; }
+        img { max-width: 100%; height: auto; }
         .small-img { width: 250px; height: 250px; }
         .medium-img { width: 200px; height: 200px; border: 2px solid #000; }
         .large-img { width: 200px; height: 400px; }
-
     </style>
 </head>
 <body>
-    
     <div class="header">
         <img src="IIU Logo.jpg" alt="IIU logo" class="small-img">
         <h1>IIUI Schools, Canton Election</h1>
         <img src="IIUIS Logo.jpg" alt="IIUIS logo" class="small-img">
     </div>
     
-
     <div class="category">
         <h2>The Challengers</h2>
         <img src="IIui Flags (2).jpg" alt="Challengers" class="large-img">
@@ -44,7 +35,7 @@
             <div class="participant">
                 <img src="Ibrahim.jpeg" alt="IBRAHIM" class="medium-img">
                 <input type="radio" name="Challengers" value="IBRAHIM">
-                <label for="IBRAHIM HARIS">IBRAHIM HARIS</label>
+                <label for="IBRAHIM">IBRAHIM HARIS</label>
             </div>
             <div class="participant">
                 <img src="Jaseem Ahmed.jpeg" alt="JASEEM AHMED" class="medium-img">
@@ -83,7 +74,7 @@
             <div class="participant">
                 <img src="Muhammad Umar Khan.jpeg" alt="M UMAR KHAN" class="medium-img">
                 <input type="radio" name="Fighters" value="M UMAR KHAN">
-                <label for="MUHAMMAD UMAR KHAN">MUHAMMAD UMAR KHAN</label>
+                <label for="M UMAR KHAN">M UMAR KHAN</label>
             </div>
         </div>
     </div>
@@ -107,37 +98,55 @@
     
     <button onclick="submitVote()">Submit Vote</button>
     <button onclick="calculateResults()">Show Results</button>
-  
-    <div class="results" id="results"></div>
     
+    <div class="results" id="results"></div>
+
+    <!-- Add Firebase JS SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    
+    <!-- Initialize Firebase -->
     <script>
-    function submitVote() {
-        var votesRef = database.ref('votes');
-        votesRef.push({
-            Challengers: document.querySelector('input[name="Challengers"]:checked').value,
-            Braves: document.querySelector('input[name="Braves"]:checked').value,
-            Fighters: document.querySelector('input[name="Fighters"]:checked').value,
-            Stalwarts: document.querySelector('input[name="Stalwarts"]:checked').value
-        });
-        alert("Your vote has been submitted!");
-        location.reload();  // Reload the page
-    }
-      
-       <script>
-    function calculateResults() {
-        var votesRef = database.ref('votes');
-        votesRef.once('value', function(snapshot) {
-            var votes = snapshot.val();
-            // Process and display the votes
-            var results = {};
-            for (var key in votes) {
-                if (votes.hasOwnProperty(key)) {
-                    var vote = votes[key];
-                    for (var category in vote) {
-                        if (vote.hasOwnProperty(category)) {
-                            if (!results[category]) {
-                                results[category] = {};
-                            }
+        var firebaseConfig = {
+            apiKey: "AIzaSyDLGQdj51bAq5iaH-9PZDJlvOLlsIVFlcQ",
+            authDomain: "iiuisl-canton-election.firebaseapp.com",
+            databaseURL: "https://iiuisl-canton-election.firebaseio.com",
+            projectId: "iiuisl-canton-election",
+            storageBucket: "iiuisl-canton-election.appspot.com",
+            messagingSenderId: "161454008744",
+            appId: "1:161454008744:web:27c49cfe7c27adcfb9d59d",
+            measurementId: "G-MKZE92HLSJ"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+    </script>
+
+    <script>
+        function submitVote() {
+            var votesRef = database.ref('votes');
+            votesRef.push({
+                Challengers: document.querySelector('input[name="Challengers"]:checked').value,
+                Braves: document.querySelector('input[name="Braves"]:checked').value,
+                Fighters: document.querySelector('input[name="Fighters"]:checked').value,
+                Stalwarts: document.querySelector('input[name="Stalwarts"]:checked').value
+            });
+            alert("Your vote has been submitted!");
+            location.reload();  // Reload the page
+        }
+
+        function calculateResults() {
+            var votesRef = database.ref('votes');
+            votesRef.once('value', function(snapshot) {
+                var votes = snapshot.val();
+                var results = {};
+                for (var key in votes) {
+                    if (votes.hasOwnProperty(key)) {
+                        var vote = votes[key];
+                        for (var category in vote) {
+                            if (vote.hasOwnProperty(category)) {
+                                if (!results[category]) {
+                                    results[category] = {};
+                                }
                             if (!results[category][vote[category]]) {
                                 results[category][vote[category]] = 0;
                             }
@@ -149,7 +158,6 @@
             displayResults(results);
         });
     }
-
     function displayResults(results) {
         document.getElementById('results').innerHTML = `
             <h3>Results</h3>
@@ -166,29 +174,5 @@
     }
 </script>
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDLGQdj51bAq5iaH-9PZDJlvOLlsIVFlcQ",
-  authDomain: "iiuisl-canton-election.firebaseapp.com",
-  projectId: "iiuisl-canton-election",
-  storageBucket: "iiuisl-canton-election.appspot.com",
-  messagingSenderId: "161454008744",
-  appId: "1:161454008744:web:27c49cfe7c27adcfb9d59d",
-  measurementId: "G-MKZE92HLSJ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-    
 </body>
 </html>
